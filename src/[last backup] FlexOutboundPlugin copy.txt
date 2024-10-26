@@ -1,0 +1,21 @@
+import React from 'react';
+import { FlexPlugin } from '@twilio/flex-plugin';
+import { Theme } from '@twilio-paste/core/theme';
+import OutboundMessaging from './components/OutboundMessaging/OutboundMessaging'; // Your UI component
+
+const PLUGIN_NAME = 'FlexOutboundPlugin';
+
+export default class FlexOutboundPlugin extends FlexPlugin {
+  constructor() {
+    super(PLUGIN_NAME);
+  }
+
+  async init(flex, manager) {
+    // Replace CRMContainer content with your custom component
+    flex.CRMContainer.Content.replace(
+      <Theme.Provider theme="default" key="crm-theme-provider">
+        <OutboundMessaging key="outbound-messaging" />
+      </Theme.Provider>
+    );
+  }
+}
