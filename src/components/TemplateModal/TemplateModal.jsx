@@ -53,9 +53,11 @@ const TemplateModal = ({ templates, isOpen, onClose, onTemplateSelect }) => {
   }, [searchTerm, templates, selectedFilters]);
 
   const handleTemplateSelect = (template) => {
-    onTemplateSelect(template);
+    const { body, contentType } = extractBodyAndContentType(template.types || {});
+    onTemplateSelect({ ...template, body, contentType }); // Add body and contentType to selected template
     onClose();
   };
+  
 
   const handleClearAll = () => {
     setSearchTerm('');

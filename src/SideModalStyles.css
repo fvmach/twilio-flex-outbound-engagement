@@ -1,0 +1,13 @@
+/* Default width for SideModal */
+.custom-side-modal {
+    width: 60vw; /* 40% width for desktop */
+    max-width: none; /* Remove max-width constraint */
+  }
+  
+  /* Full width for mobile */
+  @media (max-width: 768px) {
+    .custom-side-modal {
+      width: 100vw; /* Full width on mobile */
+    }
+  }
+  

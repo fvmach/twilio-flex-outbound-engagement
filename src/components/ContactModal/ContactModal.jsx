@@ -5,10 +5,11 @@ import { Checkbox } from '@twilio-paste/core/checkbox';
 import { DataGrid, DataGridHead, DataGridRow, DataGridHeader, DataGridBody, DataGridCell } from '@twilio-paste/core/data-grid';
 import { Box } from '@twilio-paste/core/box';
 import { Text } from '@twilio-paste/core/text';
-import { Input } from '@twilio-paste/core/input';  // Add Input for Search
+import { Input } from '@twilio-paste/core/input';
+import { Select, Option } from '@twilio-paste/core/select';
 import Papa from 'papaparse';
 
-const fetchContacts = async () => {
+const fetchContactsFromAsset = async () => {
   try {
     const response = await fetch('https://flex-omnichannel-campaigns-3419.twil.io/fetch-contacts', {
       method: 'GET'
@@ -16,12 +17,11 @@ const fetchContacts = async () => {
 
     const data = await response.json();
     if (data.success) {
-      // Parse the CSV data using PapaParse
       const parsedData = Papa.parse(data.data, {
         header: true,
         skipEmptyLines: true,
       });
-      return parsedData.data; // Return the array of parsed contacts
+      return parsedData.data;
     } else {
       console.error('Failed to fetch contacts:', data.message);
       return [];
@@ -32,34 +32,59 @@ const fetchContacts = async () => {
   }
 };
 
+const isValidContact = (contact) => {
+  const phoneRegex = /^\+[1-9]\d{1,14}$/;
+  return phoneRegex.test(contact.phone) || contact.email;
+};
+
 const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [contacts, setContacts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');  // Search term
-  const [filteredContacts, setFilteredContacts] = useState([]);  // Filtered contacts
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [contactSource, setContactSource] = useState('twilioAsset');
 
   useEffect(() => {
     const loadContacts = async () => {
-      const fetchedContacts = await fetchContacts();
-      setContacts(fetchedContacts);
-      setFilteredContacts(fetchedContacts);  // Initialize filtered contacts
+      if (contactSource === 'twilioAsset') {
+        const fetchedContacts = await fetchContactsFromAsset();
+        setContacts(fetchedContacts);
+        setFilteredContacts(fetchedContacts);
+      }
     };
 
     if (isOpen) {
-      loadContacts(); // Fetch contacts only when modal is opened
+      loadContacts();
     }
-  }, [isOpen]);
+  }, [isOpen, contactSource]);
 
-  // Search functionality
   useEffect(() => {
     setFilteredContacts(
       contacts.filter((contact) =>
         `${contact.first_name} ${contact.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contact.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contact.email.toLowerCase().includes(searchTerm.toLowerCase())
+        (contact.phone && contact.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase()))
       )
     );
   }, [searchTerm, contacts]);
+
+  const handleCSVUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          const parsedContacts = result.data.filter(isValidContact);
+          setContacts(parsedContacts);
+          setFilteredContacts(parsedContacts);
+        },
+        error: (error) => {
+          console.error('Error parsing CSV:', error);
+        },
+      });
+    }
+  };
 
   const handleContactSelect = (contactId) => {
     setSelectedContacts((prevSelectedContacts) =>
@@ -69,20 +94,19 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
     );
   };
 
-  // Select all contacts
   const handleSelectAll = () => {
     if (selectedContacts.length === filteredContacts.length) {
-      setSelectedContacts([]);  // Deselect all
+      setSelectedContacts([]);
     } else {
-      setSelectedContacts(filteredContacts.map((contact) => contact.phone));  // Select all filtered contacts
+      setSelectedContacts(filteredContacts.map((contact) => contact.phone || contact.email));
     }
   };
 
   const handleSubmit = () => {
     const selectedContactDetails = contacts.filter((contact) =>
-      selectedContacts.includes(contact.phone)
+      selectedContacts.includes(contact.phone || contact.email)
     );
-    onContactsSelect(selectedContactDetails); // Send the selected contacts back to parent component
+    onContactsSelect(selectedContactDetails);
     onClose();
   };
 
@@ -90,6 +114,24 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
     <Modal isOpen={isOpen} onDismiss={onClose} ariaLabel="Contact Modal" size="wide">
       <ModalHeader>Select Contacts to Send Template</ModalHeader>
       <ModalBody>
+        <Box marginBottom="space40">
+          <Select
+            id="contact-source"
+            value={contactSource}
+            onChange={(e) => setContactSource(e.target.value)}
+          >
+            <Option value="twilioAsset">Twilio Asset</Option>
+            <Option value="externalDatabase" disabled>External Database (coming soon)</Option>
+            <Option value="csvUpload">CSV Upload</Option>
+          </Select>
+        </Box>
+
+        {contactSource === 'csvUpload' && (
+          <Box marginBottom="space40">
+            <Input type="file" accept=".csv" onChange={handleCSVUpload} />
+          </Box>
+        )}
+
         <Box marginBottom="space40">
           <Input
             id="search"
@@ -99,6 +141,7 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </Box>
+
         {contacts.length > 0 ? (
           <>
             <Box marginBottom="space40">
@@ -110,9 +153,9 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
               <DataGridHead>
                 <DataGridRow>
                   <DataGridHeader>Select</DataGridHeader>
-                  <DataGridHeader>Name</DataGridHeader>
-                  <DataGridHeader>Phone</DataGridHeader>
-                  <DataGridHeader>Email</DataGridHeader>
+                  {Object.keys(contacts[0]).map((header, index) => (
+                    <DataGridHeader key={index}>{header}</DataGridHeader>
+                  ))}
                 </DataGridRow>
               </DataGridHead>
               <DataGridBody>
@@ -120,14 +163,13 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
                   <DataGridRow key={index}>
                     <DataGridCell>
                       <Checkbox
-                        checked={selectedContacts.includes(contact.phone)}
-                        onChange={() => handleContactSelect(contact.phone)}
-                      >
-                      </Checkbox>
+                        checked={selectedContacts.includes(contact.phone || contact.email)}
+                        onChange={() => handleContactSelect(contact.phone || contact.email)}
+                      />
                     </DataGridCell>
-                    <DataGridCell>{contact.first_name} {contact.last_name}</DataGridCell>
-                    <DataGridCell>{contact.phone}</DataGridCell>
-                    <DataGridCell>{contact.email}</DataGridCell>
+                    {Object.values(contact).map((value, idx) => (
+                      <DataGridCell key={idx}>{value}</DataGridCell>
+                    ))}
                   </DataGridRow>
                 ))}
               </DataGridBody>
