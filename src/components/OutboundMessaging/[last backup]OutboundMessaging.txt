@@ -1,40 +1,56 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Label, Input, Text, Card, Heading, Grid, Column, Separator, Combobox } from '@twilio-paste/core';
+import {
+  Box,
+  Button,
+  Label,
+  Input,
+  Text,
+  Card,
+  Heading,
+  Grid,
+  Column,
+  Separator,
+  Combobox,
+} from '@twilio-paste/core';
 import { Theme } from '@twilio-paste/core/theme';
 import { SendIcon } from '@twilio-paste/icons/esm/SendIcon';
 import TemplateModal from '../TemplateModal/TemplateModal';
 import ContactModal from '../ContactModal/ContactModal';
+import MessagePersonalization from '../MessagePersonalization/MessagePersonalization';
 
-const OutboundMessaging = () => {
+const OutboundMessaging = ({
+  selectedContacts,
+  setSelectedContacts,
+  selectedTemplate,
+  setSelectedTemplate,
+  selectedChannel,
+  setSelectedChannel,
+  templateVariables,
+  setTemplateVariables,
+  manualContentSid,
+  setManualContentSid,
+}) => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [manualContentSid, setManualContentSid] = useState("");  
-  const [selectedContacts, setSelectedContacts] = useState([]);  
-  const [selectedTemplate, setSelectedTemplate] = useState(null);  
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);  
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);  
-  const [selectedChannel, setSelectedChannel] = useState("");  
-  const [templateVariables, setTemplateVariables] = useState({});
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isPersonalizationModalOpen, setIsPersonalizationModalOpen] = useState(false);
 
   const channelOptions = ['WhatsApp', 'RCS', 'SMS', 'Email', 'Phone'];
+  const columnOptions = ['First Name', 'Last Name', 'Email', 'Phone', 'Address']; // Replace with actual column options
 
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const response = await fetch('https://flex-omnichannel-campaigns-3419.twil.io/list-templates-approvals', {
-          method: 'GET'
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch templates');
-        }
-
+        const response = await fetch('https://flex-omnichannel-campaigns-3419.twil.io/list-templates-approvals');
+        if (!response.ok) throw new Error('Failed to fetch templates');
+        
         const data = await response.json();
         setTemplates(data.templates);
-        setLoading(false);
       } catch (err) {
         setError('Failed to fetch templates. Please input a Content SID manually.');
+      } finally {
         setLoading(false);
       }
     };
@@ -42,15 +58,14 @@ const OutboundMessaging = () => {
     fetchTemplates();
   }, []);
 
-  const handleInputChange = (event) => {
-    setManualContentSid(event.target.value);
-  };
+  const handleInputChange = (event) => setManualContentSid(event.target.value);
 
   const openTemplateModal = () => setIsTemplateModalOpen(true);
   const closeTemplateModal = () => setIsTemplateModalOpen(false);
-
   const openContactModal = () => setIsContactModalOpen(true);
   const closeContactModal = () => setIsContactModalOpen(false);
+  const openPersonalizationModal = () => setIsPersonalizationModalOpen(true);
+  const closePersonalizationModal = () => setIsPersonalizationModalOpen(false);
 
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
@@ -61,27 +76,18 @@ const OutboundMessaging = () => {
       const vars = {};
       matches.forEach((match) => {
         const varNumber = match.replace(/[{}]/g, "");
-        vars[varNumber] = "";  // Initialize with empty strings
+        vars[varNumber] = "";
       });
       setTemplateVariables(vars);
     }
-    
-    closeTemplateModal();  
+    closeTemplateModal();
   };
 
   const handleContactsSelect = (contacts) => {
-    setSelectedContacts(contacts);  
-    closeContactModal();  
+    setSelectedContacts(contacts);
+    closeContactModal();
   };
 
-  const handleVariableChange = (index, value) => {
-    setTemplateVariables((prevVars) => ({
-      ...prevVars,
-      [index]: value,
-    }));
-  };
-
-  // Function to replace placeholders in the template body with user inputs
   const getTemplateBodyWithVariables = () => {
     if (!selectedTemplate || !selectedTemplate.body) return "";
 
@@ -99,7 +105,7 @@ const OutboundMessaging = () => {
 
     const selectedContactDetails = selectedContacts
       .map(contact => `phoneNumber=whatsapp:${contact.telephone || contact.phone}`)
-      .join('&');  
+      .join('&');
 
     const templateSid = selectedTemplate?.sid || manualContentSid;
 
@@ -113,15 +119,13 @@ const OutboundMessaging = () => {
     });
 
     try {
-      const response = await fetch(`https://flex-omnichannel-campaigns-3419.twil.io/whatsapp_send_template?${queryParams.toString()}`, {
-        method: 'GET',
-      });
-
+      const response = await fetch(`https://flex-omnichannel-campaigns-3419.twil.io/whatsapp_send_template?${queryParams.toString()}`);
       const result = await response.json();
+
       if (result.success) {
         alert('Messages sent successfully!');
       } else {
-        alert('Failed to send messages: ' + result.error);
+        alert(`Failed to send messages: ${result.error}`);
       }
     } catch (error) {
       console.error('Error sending messages:', error);
@@ -133,7 +137,7 @@ const OutboundMessaging = () => {
     <Theme.Provider theme="default">
       <Box padding="space70">
         <Box display="flex" alignItems="center" marginBottom="space60" marginRight="space60">
-          <SendIcon decorative={false} title="Send Icon" size="sizeIcon70" />  
+          <SendIcon decorative={false} title="Send Icon" size="sizeIcon70" />
           <Heading as="h2" marginLeft="space40" marginBottom="space0">
             Flex Outbound Communications
           </Heading>
@@ -153,37 +157,32 @@ const OutboundMessaging = () => {
         />
         <Box marginBottom="space60" />
 
-        <Label htmlFor='select-contacts' marginBottom="space30">
+        <Label htmlFor="select-contacts" marginBottom="space30">
           STEP 2 - Select the contacts to send the {selectedChannel || "message"}:
         </Label>
-        <Button variant="primary" onClick={openContactModal} marginBottom="space60">Select Contacts</Button>
+        <Button variant="primary" onClick={openContactModal} marginBottom="space60">
+          Select Contacts
+        </Button>
 
         <Box marginBottom="space60" />
 
-        <Label htmlFor='select-template' marginTop="space60" marginBottom="space40">
+        <Label htmlFor="select-template" marginTop="space60" marginBottom="space40">
           STEP 3 - Select the {selectedChannel || "message"} templates to be sent:
         </Label>
-        <Button variant="primary" onClick={openTemplateModal} marginBottom="space60">Select Template</Button>
+        <Button variant="primary" onClick={openTemplateModal} marginBottom="space60">
+          Select Template
+        </Button>
 
         <Separator orientation="horizontal" verticalSpacing="space60" />
 
-        <Label htmlFor="manual-sid" marginBottom="space30">
-          Alternatively, please enter the SID of the template manually:
-        </Label>
-        <Input
-          id="manual-sid"
-          type="text"
-          value={manualContentSid}
-          onChange={handleInputChange}
-          placeholder="Enter Content SID"
-        />
-
-        <Separator orientation="horizontal" verticalSpacing="space60" />
-
-        <Text as="p" marginBottom="space40">Validate the selected contacts and templates:</Text>
+        <Text as="p" marginBottom="space40">
+          Validate the selected contacts and templates:
+        </Text>
         <Grid gutter="space60">
           <Column>
-            <Heading as="h4" variant="heading40">Selected Contacts</Heading>
+            <Heading as="h4" variant="heading40">
+              Selected Contacts
+            </Heading>
             <Card padding="space60">
               {selectedContacts.length > 0 ? (
                 <>
@@ -205,7 +204,9 @@ const OutboundMessaging = () => {
           </Column>
 
           <Column>
-            <Heading as="h4" variant="heading40">Selected Template</Heading>
+            <Heading as="h4" variant="heading40">
+              Selected Template
+            </Heading>
             <Card padding="space60">
               {selectedTemplate ? (
                 <Text
@@ -217,27 +218,21 @@ const OutboundMessaging = () => {
               )}
             </Card>
             <Box marginTop="space40">
-              <Heading as="h5" variant="heading50">Input Variables</Heading>
-              {Object.keys(templateVariables).map((key) => (
-                <Box key={key} marginBottom="space30">
-                  <Label htmlFor={`variable-${key}`}>Variable {key}</Label>
-                  <Input
-                    id={`variable-${key}`}
-                    type="text"
-                    value={templateVariables[key]}
-                    onChange={(e) => handleVariableChange(key, e.target.value)}
-                    placeholder={`Enter value for {{${key}}}`}
-                    style={{ fontWeight: 'bold', borderColor: '#99CDFF' }}
-                  />
-                </Box>
-              ))}
+              <Button variant="primary" onClick={openPersonalizationModal}>
+                Personalize Message
+              </Button>
             </Box>
           </Column>
         </Grid>
 
         <Separator orientation="horizontal" verticalSpacing="space60" />
 
-        <Button variant="primary" marginTop="space80" onClick={sendMessages} disabled={selectedContacts.length === 0 && !manualContentSid}>
+        <Button
+          variant="primary"
+          marginTop="space80"
+          onClick={sendMessages}
+          disabled={selectedContacts.length === 0 && !manualContentSid}
+        >
           Send {selectedChannel || "Message"}
         </Button>
 
@@ -252,6 +247,15 @@ const OutboundMessaging = () => {
           isOpen={isContactModalOpen}
           onClose={closeContactModal}
           onContactsSelect={handleContactsSelect}
+        />
+
+        <MessagePersonalization
+          isOpen={isPersonalizationModalOpen}
+          onClose={closePersonalizationModal}
+          templateVariables={templateVariables}
+          setTemplateVariables={setTemplateVariables}
+          columnOptions={columnOptions}
+          templateBody={selectedTemplate?.body || ""}
         />
       </Box>
     </Theme.Provider>

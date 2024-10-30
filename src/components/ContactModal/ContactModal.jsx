@@ -42,7 +42,13 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredContacts, setFilteredContacts] = useState([]);
-  const [contactSource, setContactSource] = useState('twilioAsset');
+  const [contactSource, setContactSource] = useState('manualInput');
+  const [manualContact, setManualContact] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
+  });
 
   useEffect(() => {
     const loadContacts = async () => {
@@ -53,7 +59,7 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
       }
     };
 
-    if (isOpen) {
+    if (isOpen && contactSource === 'twilioAsset') {
       loadContacts();
     }
   }, [isOpen, contactSource]);
@@ -103,10 +109,16 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
   };
 
   const handleSubmit = () => {
-    const selectedContactDetails = contacts.filter((contact) =>
-      selectedContacts.includes(contact.phone || contact.email)
-    );
-    onContactsSelect(selectedContactDetails);
+    if (contactSource === 'manualInput') {
+      // Add manual contact to the selection
+      onContactsSelect([manualContact]);
+    } else {
+      // Add selected contacts from data grid
+      const selectedContactDetails = contacts.filter((contact) =>
+        selectedContacts.includes(contact.phone || contact.email)
+      );
+      onContactsSelect(selectedContactDetails);
+    }
     onClose();
   };
 
@@ -120,11 +132,50 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
             value={contactSource}
             onChange={(e) => setContactSource(e.target.value)}
           >
+            <Option value="manualInput">Manual Input</Option>
             <Option value="twilioAsset">Twilio Asset</Option>
-            <Option value="externalDatabase" disabled>External Database (coming soon)</Option>
+            <Option value="unifiedProfiles" disabled>Unified Profiles (coming soon)</Option>
             <Option value="csvUpload">CSV Upload</Option>
           </Select>
         </Box>
+
+        {contactSource === 'manualInput' && (
+          <Box marginBottom="space40">
+            <Input
+              id="first-name"
+              placeholder="First Name"
+              value={manualContact.firstName}
+              onChange={(e) => setManualContact({ ...manualContact, firstName: e.target.value })}
+            />
+            <Input
+              id="last-name"
+              placeholder="Last Name"
+              value={manualContact.lastName}
+              onChange={(e) => setManualContact({ ...manualContact, lastName: e.target.value })}
+              marginTop="space40"
+            />
+            <Input
+              id="phone"
+              placeholder="Phone (+123456789)"
+              value={manualContact.phone}
+              onChange={(e) => setManualContact({ ...manualContact, phone: e.target.value })}
+              marginTop="space40"
+            />
+            <Input
+              id="email"
+              placeholder="Email"
+              value={manualContact.email}
+              onChange={(e) => setManualContact({ ...manualContact, email: e.target.value })}
+              marginTop="space40"
+            />
+          </Box>
+        )}
+
+        {contactSource === 'unifiedProfiles' && (
+          <Text as="p" fontSize="fontSize30" color="colorTextWeak">
+            Unified Profiles integration is coming soon.
+          </Text>
+        )}
 
         {contactSource === 'csvUpload' && (
           <Box marginBottom="space40">
@@ -132,51 +183,55 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
           </Box>
         )}
 
-        <Box marginBottom="space40">
-          <Input
-            id="search"
-            type="text"
-            value={searchTerm}
-            placeholder="Search contacts"
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </Box>
-
-        {contacts.length > 0 ? (
+        {(contactSource === 'twilioAsset' || (contactSource === 'csvUpload' && contacts.length > 0)) && (
           <>
             <Box marginBottom="space40">
-              <Button variant="secondary" onClick={handleSelectAll}>
-                {selectedContacts.length === filteredContacts.length ? 'Deselect All' : 'Select All'}
-              </Button>
+              <Input
+                id="search"
+                type="text"
+                value={searchTerm}
+                placeholder="Search contacts"
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </Box>
-            <DataGrid aria-label="Contacts DataGrid">
-              <DataGridHead>
-                <DataGridRow>
-                  <DataGridHeader>Select</DataGridHeader>
-                  {Object.keys(contacts[0]).map((header, index) => (
-                    <DataGridHeader key={index}>{header}</DataGridHeader>
-                  ))}
-                </DataGridRow>
-              </DataGridHead>
-              <DataGridBody>
-                {filteredContacts.map((contact, index) => (
-                  <DataGridRow key={index}>
-                    <DataGridCell>
-                      <Checkbox
-                        checked={selectedContacts.includes(contact.phone || contact.email)}
-                        onChange={() => handleContactSelect(contact.phone || contact.email)}
-                      />
-                    </DataGridCell>
-                    {Object.values(contact).map((value, idx) => (
-                      <DataGridCell key={idx}>{value}</DataGridCell>
+
+            {contacts.length > 0 ? (
+              <>
+                <Box marginBottom="space40">
+                  <Button variant="secondary" onClick={handleSelectAll}>
+                    {selectedContacts.length === filteredContacts.length ? 'Deselect All' : 'Select All'}
+                  </Button>
+                </Box>
+                <DataGrid aria-label="Contacts DataGrid">
+                  <DataGridHead>
+                    <DataGridRow>
+                      <DataGridHeader>Select</DataGridHeader>
+                      {Object.keys(contacts[0]).map((header, index) => (
+                        <DataGridHeader key={index}>{header}</DataGridHeader>
+                      ))}
+                    </DataGridRow>
+                  </DataGridHead>
+                  <DataGridBody>
+                    {filteredContacts.map((contact, index) => (
+                      <DataGridRow key={index}>
+                        <DataGridCell>
+                          <Checkbox
+                            checked={selectedContacts.includes(contact.phone || contact.email)}
+                            onChange={() => handleContactSelect(contact.phone || contact.email)}
+                          />
+                        </DataGridCell>
+                        {Object.values(contact).map((value, idx) => (
+                          <DataGridCell key={idx}>{value}</DataGridCell>
+                        ))}
+                      </DataGridRow>
                     ))}
-                  </DataGridRow>
-                ))}
-              </DataGridBody>
-            </DataGrid>
+                  </DataGridBody>
+                </DataGrid>
+              </>
+            ) : (
+              <Text>No contacts available.</Text>
+            )}
           </>
-        ) : (
-          <Text>No contacts available.</Text>
         )}
       </ModalBody>
       <ModalFooter>

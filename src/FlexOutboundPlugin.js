@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlexPlugin } from '@twilio/flex-plugin';
 import { Theme } from '@twilio-paste/core/theme';
 import { Button } from '@twilio-paste/core/button';
@@ -12,7 +12,7 @@ import {
   SideModalHeading,
   useSideModalState,
 } from '@twilio-paste/core/side-modal';
-import OutboundMessaging from './components/OutboundMessaging/OutboundMessaging'; // Your custom component
+import OutboundMessaging from './components/OutboundMessaging/OutboundMessaging';
 
 const PLUGIN_NAME = 'FlexOutboundPlugin';
 
@@ -22,49 +22,59 @@ export default class FlexOutboundPlugin extends FlexPlugin {
   }
 
   async init(flex, manager) {
-    // Add a new button to the Main Header to open the Side Modal
     flex.MainHeader.Content.add(
       <Theme.Provider theme="default" key="side-modal-button-theme-provider">
         <SideModalExample />
       </Theme.Provider>,
       {
-        sortOrder: -1, // Ensures it is placed at the left
+        sortOrder: -1,
         align: 'end',
       }
     );
   }
 }
 
-// Side Modal Component
 const SideModalExample = () => {
   const dialog = useSideModalState({});
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // Toggle full-screen mode
-  const toggleFullScreen = () => {
-    setIsFullScreen((prev) => !prev);
-  };
+  // State for OutboundMessaging
+  const [selectedContacts, setSelectedContacts] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedChannel, setSelectedChannel] = useState("");
+  const [templateVariables, setTemplateVariables] = useState({});
+  const [manualContentSid, setManualContentSid] = useState("");
+
+  const toggleFullScreen = () => setIsFullScreen((prev) => !prev);
 
   return (
     <Box>
-      {/* Button to open the Side Modal */}
       <SideModalContainer state={dialog}>
         <SideModalButton variant="secondary_icon" size="icon_small">
           <Button variant="secondary" size="small">Open Outbound Messaging</Button>
         </SideModalButton>
 
-        {/* Side Modal with optional full-screen overlay */}
         {!isFullScreen ? (
           <SideModal aria-label="Outbound Messaging Modal" size="wide">
             <SideModalHeader>
               <SideModalHeading>Send Messages or Start Calls</SideModalHeading>
-              {/* Button to expand to full screen */}
               <Button variant="link" size="small" onClick={toggleFullScreen} style={{ marginLeft: 'auto' }}>
                 Expand to Full Screen
               </Button>
             </SideModalHeader>
             <SideModalBody>
-              <OutboundMessaging />
+              <OutboundMessaging
+                selectedContacts={selectedContacts}
+                setSelectedContacts={setSelectedContacts}
+                selectedTemplate={selectedTemplate}
+                setSelectedTemplate={setSelectedTemplate}
+                selectedChannel={selectedChannel}
+                setSelectedChannel={setSelectedChannel}
+                templateVariables={templateVariables}
+                setTemplateVariables={setTemplateVariables}
+                manualContentSid={manualContentSid}
+                setManualContentSid={setManualContentSid}
+              />
             </SideModalBody>
           </SideModal>
         ) : (
@@ -87,7 +97,19 @@ const SideModalExample = () => {
                 Exit Full Screen
               </Button>
             </Box>
-            <OutboundMessaging style={{zIndex: 2000}}/>
+            <OutboundMessaging
+              selectedContacts={selectedContacts}
+              setSelectedContacts={setSelectedContacts}
+              selectedTemplate={selectedTemplate}
+              setSelectedTemplate={setSelectedTemplate}
+              selectedChannel={selectedChannel}
+              setSelectedChannel={setSelectedChannel}
+              templateVariables={templateVariables}
+              setTemplateVariables={setTemplateVariables}
+              manualContentSid={manualContentSid}
+              setManualContentSid={setManualContentSid}
+              style={{ zIndex: 2000 }}
+            />
           </Box>
         )}
       </SideModalContainer>

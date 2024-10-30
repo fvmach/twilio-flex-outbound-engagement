@@ -16,20 +16,29 @@ import { Theme } from '@twilio-paste/core/theme';
 import { SendIcon } from '@twilio-paste/icons/esm/SendIcon';
 import TemplateModal from '../TemplateModal/TemplateModal';
 import ContactModal from '../ContactModal/ContactModal';
+import MessagePersonalization from '../MessagePersonalization/MessagePersonalization';
 
-const OutboundMessaging = () => {
+const OutboundMessaging = ({
+  selectedContacts,
+  setSelectedContacts,
+  selectedTemplate,
+  setSelectedTemplate,
+  selectedChannel,
+  setSelectedChannel,
+  templateVariables,
+  setTemplateVariables,
+  manualContentSid,
+  setManualContentSid,
+}) => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [manualContentSid, setManualContentSid] = useState("");
-  const [selectedContacts, setSelectedContacts] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [selectedChannel, setSelectedChannel] = useState("");
-  const [templateVariables, setTemplateVariables] = useState({});
+  const [isPersonalizationModalOpen, setIsPersonalizationModalOpen] = useState(false);
 
   const channelOptions = ['WhatsApp', 'RCS', 'SMS', 'Email', 'Phone'];
+  const columnOptions = ['First Name', 'Last Name', 'Email', 'Phone', 'Address']; // Replace with actual column options
 
   useEffect(() => {
     const fetchTemplates = async () => {
@@ -50,10 +59,13 @@ const OutboundMessaging = () => {
   }, []);
 
   const handleInputChange = (event) => setManualContentSid(event.target.value);
+
   const openTemplateModal = () => setIsTemplateModalOpen(true);
   const closeTemplateModal = () => setIsTemplateModalOpen(false);
   const openContactModal = () => setIsContactModalOpen(true);
   const closeContactModal = () => setIsContactModalOpen(false);
+  const openPersonalizationModal = () => setIsPersonalizationModalOpen(true);
+  const closePersonalizationModal = () => setIsPersonalizationModalOpen(false);
 
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
@@ -68,20 +80,12 @@ const OutboundMessaging = () => {
       });
       setTemplateVariables(vars);
     }
-
     closeTemplateModal();
   };
 
   const handleContactsSelect = (contacts) => {
     setSelectedContacts(contacts);
     closeContactModal();
-  };
-
-  const handleVariableChange = (index, value) => {
-    setTemplateVariables((prevVars) => ({
-      ...prevVars,
-      [index]: value,
-    }));
   };
 
   const getTemplateBodyWithVariables = () => {
@@ -171,19 +175,6 @@ const OutboundMessaging = () => {
 
         <Separator orientation="horizontal" verticalSpacing="space60" />
 
-        <Label htmlFor="manual-sid" marginBottom="space30">
-          Alternatively, please enter the SID of the template manually:
-        </Label>
-        <Input
-          id="manual-sid"
-          type="text"
-          value={manualContentSid}
-          onChange={handleInputChange}
-          placeholder="Enter Content SID"
-        />
-
-        <Separator orientation="horizontal" verticalSpacing="space60" />
-
         <Text as="p" marginBottom="space40">
           Validate the selected contacts and templates:
         </Text>
@@ -227,22 +218,9 @@ const OutboundMessaging = () => {
               )}
             </Card>
             <Box marginTop="space40">
-              <Heading as="h5" variant="heading50">
-                Input Variables
-              </Heading>
-              {Object.keys(templateVariables).map((key) => (
-                <Box key={key} marginBottom="space30">
-                  <Label htmlFor={`variable-${key}`}>Variable {key}</Label>
-                  <Input
-                    id={`variable-${key}`}
-                    type="text"
-                    value={templateVariables[key]}
-                    onChange={(e) => handleVariableChange(key, e.target.value)}
-                    placeholder={`Enter value for {{${key}}}`}
-                    style={{ fontWeight: 'bold', borderColor: '#99CDFF' }}
-                  />
-                </Box>
-              ))}
+              <Button variant="primary" onClick={openPersonalizationModal}>
+                Personalize Message
+              </Button>
             </Box>
           </Column>
         </Grid>
@@ -269,6 +247,15 @@ const OutboundMessaging = () => {
           isOpen={isContactModalOpen}
           onClose={closeContactModal}
           onContactsSelect={handleContactsSelect}
+        />
+
+        <MessagePersonalization
+          isOpen={isPersonalizationModalOpen}
+          onClose={closePersonalizationModal}
+          templateVariables={templateVariables}
+          setTemplateVariables={setTemplateVariables}
+          columnOptions={columnOptions}
+          templateBody={selectedTemplate?.body || ""}
         />
       </Box>
     </Theme.Provider>
