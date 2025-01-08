@@ -15,13 +15,13 @@ exports.handler = async function (context, event, callback) {
     }
   
     try {
-      const contentAndApprovals = await client.content.v1.contentAndApprovals.list({ limit: 20 });
+      const contentAndApprovals = await client.content.v1.contentAndApprovals.list(); // Fetch all content and approvals
   
       // Safely map the response and check for the `approvalRequests` field
       const templates = contentAndApprovals.map(content => ({
         sid: content.sid,
         friendly_name: content.friendlyName,
-        status: content.approvalRequests && content.approvalRequests[0] ? content.approvalRequests[0].status : 'unsubmitted',  // Safe access to `status`
+        status: content.approvalRequests?.[0]?.status ?? 'unsubmitted',  // Safe access to `status`
       }));
   
       response.setBody({ templates });  // Set the body with templates

@@ -90,12 +90,14 @@ const OutboundMessaging = ({
 
   const getTemplateBodyWithVariables = () => {
     if (!selectedTemplate || !selectedTemplate.body) return "";
-
+  
+    // Replace placeholders with resolved values from templateVariables
     return selectedTemplate.body.replace(/{{(\d+)}}/g, (match, p1) => {
       const value = templateVariables[p1] || `{{${p1}}}`;
       return `<span style="font-weight:bold; color:#006DFA; border:1px solid #99CDFF; padding:1px;">${value}</span>`;
     });
   };
+  
 
   const sendMessages = async () => {
     if (selectedContacts.length === 0 && !manualContentSid) {
@@ -158,7 +160,7 @@ const OutboundMessaging = ({
         <Box marginBottom="space60" />
 
         <Label htmlFor="select-contacts" marginBottom="space30">
-          STEP 2 - Select the contacts to send the {selectedChannel || "message"}:
+          STEP 2 - Select the contacts to send {selectedChannel || "message"}:
         </Label>
         <Button variant="primary" onClick={openContactModal} marginBottom="space60">
           Select Contacts
