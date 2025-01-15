@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FlexPlugin } from '@twilio/flex-plugin';
 import { Theme } from '@twilio-paste/core/theme';
-import { Button } from '@twilio-paste/core/button';
-import { Box } from '@twilio-paste/core/box';
+import { Button, Box } from '@twilio-paste/core';
 import {
   SideModal,
   SideModalBody,
@@ -12,7 +11,9 @@ import {
   SideModalHeading,
   useSideModalState,
 } from '@twilio-paste/core/side-modal';
+
 import OutboundMessaging from './components/OutboundMessaging/OutboundMessaging';
+import { addSendTemplateButton } from './components/MessageActionsSendTemplateButton/MessageActionsSendTemplateButton';
 
 const PLUGIN_NAME = 'FlexOutboundPlugin';
 
@@ -22,6 +23,13 @@ export default class FlexOutboundPlugin extends FlexPlugin {
   }
 
   async init(flex, manager) {
+
+    // Add "Send Template" button to MessageInputActions
+    addSendTemplateButton(flex);
+
+
+    
+    // Add SideModal for Outbound Messaging
     flex.MainHeader.Content.add(
       <Theme.Provider theme="default" key="side-modal-button-theme-provider">
         <SideModalExample />
@@ -41,9 +49,9 @@ const SideModalExample = () => {
   // State for OutboundMessaging
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [selectedChannel, setSelectedChannel] = useState("");
+  const [selectedChannel, setSelectedChannel] = useState('');
   const [templateVariables, setTemplateVariables] = useState({});
-  const [manualContentSid, setManualContentSid] = useState("");
+  const [manualContentSid, setManualContentSid] = useState('');
 
   const toggleFullScreen = () => setIsFullScreen((prev) => !prev);
 
@@ -51,10 +59,45 @@ const SideModalExample = () => {
     <Box>
       <SideModalContainer state={dialog}>
         <SideModalButton variant="secondary_icon" size="icon_small">
-          <Button variant="secondary" size="small">Open Outbound Messaging</Button>
+          <Button variant="secondary" size="small">
+            Open Outbound Messaging
+          </Button>
         </SideModalButton>
 
-        {!isFullScreen ? (
+        {isFullScreen ? (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'white',
+              zIndex: 50,
+              overflowY: 'auto',
+              padding: 'space60',
+            }}
+          >
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <SideModalHeading as="h2">Send Messages or Start Calls</SideModalHeading>
+              <Button variant="secondary" size="small" onClick={toggleFullScreen}>
+                Exit Full Screen
+              </Button>
+            </Box>
+            <OutboundMessaging
+              selectedContacts={selectedContacts}
+              setSelectedContacts={setSelectedContacts}
+              selectedTemplate={selectedTemplate}
+              setSelectedTemplate={setSelectedTemplate}
+              selectedChannel={selectedChannel}
+              setSelectedChannel={setSelectedChannel}
+              templateVariables={templateVariables}
+              setTemplateVariables={setTemplateVariables}
+              manualContentSid={manualContentSid}
+              setManualContentSid={setManualContentSid}
+            />
+          </Box>
+        ) : (
           <SideModal aria-label="Outbound Messaging Modal" size="wide">
             <SideModalHeader>
               <SideModalHeading>Send Messages or Start Calls</SideModalHeading>
@@ -77,40 +120,6 @@ const SideModalExample = () => {
               />
             </SideModalBody>
           </SideModal>
-        ) : (
-          <Box
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              backgroundColor: 'white',
-              zIndex: 50,
-              overflowY: 'auto',
-              padding: '20px',
-            }}
-          >
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <SideModalHeading as="h2">Send Messages or Start Calls</SideModalHeading>
-              <Button variant="secondary" size="small" onClick={toggleFullScreen}>
-                Exit Full Screen
-              </Button>
-            </Box>
-            <OutboundMessaging
-              selectedContacts={selectedContacts}
-              setSelectedContacts={setSelectedContacts}
-              selectedTemplate={selectedTemplate}
-              setSelectedTemplate={setSelectedTemplate}
-              selectedChannel={selectedChannel}
-              setSelectedChannel={setSelectedChannel}
-              templateVariables={templateVariables}
-              setTemplateVariables={setTemplateVariables}
-              manualContentSid={manualContentSid}
-              setManualContentSid={setManualContentSid}
-              style={{ zIndex: 2000 }}
-            />
-          </Box>
         )}
       </SideModalContainer>
     </Box>
