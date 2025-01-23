@@ -1,6 +1,6 @@
 # Twilio Flex Outbound Engagement
 
-The **Twilio Flex Outbound Engagement* is a Twilio Flex plugin designed to streamline outbound messaging campaigns for contact center agents. This plugin provides a user-friendly interface to manage messaging channels, contacts, templates, and personalization while maintaining seamless integration with Twilio services.
+The **Twilio Flex Outbound Engagement** is a Twilio Flex plugin designed to streamline outbound messaging campaigns for contact center agents. This plugin provides a user-friendly interface to manage messaging channels, contacts, templates, and personalization while maintaining seamless integration with Twilio services.
 
 ## Features
 
