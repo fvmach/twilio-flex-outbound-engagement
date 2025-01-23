@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { FlexPlugin } from '@twilio/flex-plugin';
 import { Theme } from '@twilio-paste/core/theme';
-import { Button, Box } from '@twilio-paste/core';
+import { Button, Box, Separator } from '@twilio-paste/core';
+import { SendIcon } from '@twilio-paste/icons/esm/SendIcon';
 import {
   SideModal,
   SideModalBody,
@@ -79,7 +80,8 @@ const SideModalExample = () => {
             }}
           >
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              <SideModalHeading as="h2">Send Messages or Start Calls</SideModalHeading>
+              <SendIcon decorative={false} title="Send Icon" size="sizeIcon70" />
+              <SideModalHeading as="h2">Flex Outbound Engagement</SideModalHeading>
               <Button variant="secondary" size="small" onClick={toggleFullScreen}>
                 Exit Full Screen
               </Button>
@@ -100,11 +102,19 @@ const SideModalExample = () => {
         ) : (
           <SideModal aria-label="Outbound Messaging Modal" size="wide">
             <SideModalHeader>
-              <SideModalHeading>Send Messages or Start Calls</SideModalHeading>
-              <Button variant="link" size="small" onClick={toggleFullScreen} style={{ marginLeft: 'auto' }}>
-                Expand to Full Screen
-              </Button>
+              <SendIcon decorative={false} title="Send Icon" size="sizeIcon50" />
+              <Box padding={10}>
+                <SideModalHeading as="h2">Flex Outbound Engagement</SideModalHeading>
+              </Box>
+              <Box>
+                <Button variant="link" size="small" onClick={toggleFullScreen} style={{ marginLeft: 'auto' }}>
+                Full Screen
+                </Button>
+              </Box>
             </SideModalHeader>
+            <Box>
+              <Separator orientation="horizontal" />
+            </Box>
             <SideModalBody>
               <OutboundMessaging
                 selectedContacts={selectedContacts}

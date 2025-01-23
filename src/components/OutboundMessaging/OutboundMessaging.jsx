@@ -138,20 +138,11 @@ const OutboundMessaging = ({
   return (
     <Theme.Provider theme="default">
       <Box padding="space70">
-        <Box display="flex" alignItems="center" marginBottom="space60" marginRight="space60">
-          <SendIcon decorative={false} title="Send Icon" size="sizeIcon70" />
-          <Heading as="h2" marginLeft="space40" marginBottom="space0">
-            Flex Outbound Communications
-          </Heading>
-        </Box>
-
-        <Box marginBottom="space60">
-          <Separator orientation="horizontal" />
-        </Box>
 
         <Label htmlFor="combobox-channel" marginBottom="space30">
-          STEP 1 - Select the channel to send the message or call:
+          STEP 1 - Channel Selection
         </Label>
+        <Text as="p" marginBottom="space30">You can select a voice or messaging channel to start an engagement.</Text>
         <Combobox
           items={channelOptions}
           onSelectedItemChange={({ selectedItem }) => setSelectedChannel(selectedItem)}
@@ -160,8 +151,9 @@ const OutboundMessaging = ({
         <Box marginBottom="space60" />
 
         <Label htmlFor="select-contacts" marginBottom="space30">
-          STEP 2 - Select the contacts to send {selectedChannel || "message"}:
+          STEP 2 - Contact Selection
         </Label>
+        <Text as="p" marginBottom="space30">You can select multiple contacts to engage.</Text>
         <Button variant="primary" onClick={openContactModal} marginBottom="space60">
           Select Contacts
         </Button>
@@ -169,10 +161,21 @@ const OutboundMessaging = ({
         <Box marginBottom="space60" />
 
         <Label htmlFor="select-template" marginTop="space60" marginBottom="space40">
-          STEP 3 - Select the {selectedChannel || "message"} templates to be sent:
+          STEP 3 - Template Selection
         </Label>
+        <Text as="p" marginBottom="space30">Choose a template to send to the selected contacts.</Text>
         <Button variant="primary" onClick={openTemplateModal} marginBottom="space60">
           Select Template
+        </Button>
+
+        <Box marginBottom="space60" />
+
+        <Label htmlFor="select-template" marginTop="space60" marginBottom="space40">
+          STEP 4 - Personalization
+        </Label>
+        <Text as="p" marginBottom="space30">Personalize the template variables and other content.</Text>
+        <Button variant="primary" onClick={openPersonalizationModal} marginBottom="space60">
+          Personalize
         </Button>
 
         <Separator orientation="horizontal" verticalSpacing="space60" />

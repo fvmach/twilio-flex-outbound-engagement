@@ -9,6 +9,31 @@ import { Input } from '@twilio-paste/core/input';
 import { Select, Option } from '@twilio-paste/core/select';
 import Papa from 'papaparse';
 
+// Fetch unified profiles from the Segment's Profiles API using the search parameters and a Twilio Function
+const fetchUnifiedProfiles = async (searchParams) => {
+  try {
+    const response = await fetch('https://flex-omnichannel-campaigns-3419.twil.io/unify-search-contacts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(searchParams),
+    });
+
+    const data = await response.json();
+    if (data.profiles) {
+      return data.profiles;
+    } else {
+      console.error('Failed to fetch profiles:', data.message);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error fetching profiles:', error);
+    return [];
+  }
+};
+
+
 const fetchContactsFromAsset = async () => {
   try {
     const response = await fetch('https://flex-omnichannel-campaigns-3419.twil.io/fetch-contacts', {
@@ -134,7 +159,7 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
           >
             <Option value="manualInput">Manual Input</Option>
             <Option value="twilioAsset">Twilio Asset</Option>
-            <Option value="unifiedProfiles" disabled>Unified Profiles (coming soon)</Option>
+            <Option value="unifiedProfiles">Unified Profiles</Option>
             <Option value="csvUpload">CSV Upload</Option>
           </Select>
         </Box>
@@ -172,10 +197,51 @@ const ContactModal = ({ isOpen, onClose, onContactsSelect }) => {
         )}
 
         {contactSource === 'unifiedProfiles' && (
-          <Text as="p" fontSize="fontSize30" color="colorTextWeak">
-            Unified Profiles integration is coming soon.
-          </Text>
+          <Box marginBottom="space40">
+            <Input
+              id="identifier"
+              placeholder="Search by Identifier (e.g., email, user ID)"
+              onChange={(e) => setSearchTerm(e.target.value.trim())}
+            />
+            <Input
+              id="trait-key"
+              placeholder="Trait Key (e.g., name, phone)"
+              onChange={(e) =>
+                setSearchParams((prev) => ({
+                  ...prev,
+                  traits: { ...prev.traits, key: e.target.value.trim() },
+                }))
+              }
+              marginTop="space40"
+            />
+            <Input
+              id="trait-value"
+              placeholder="Trait Value"
+              onChange={(e) =>
+                setSearchParams((prev) => ({
+                  ...prev,
+                  traits: { ...prev.traits, value: e.target.value.trim() },
+                }))
+              }
+              marginTop="space40"
+            />
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                const profiles = await fetchUnifiedProfiles({
+                  identifier: searchTerm,
+                  traits: searchParams.traits,
+                });
+                setContacts(profiles);
+              }}
+              marginTop="space40"
+            >
+              Search
+            </Button>
+          </Box>
         )}
+
+
 
         {contactSource === 'csvUpload' && (
           <Box marginBottom="space40">

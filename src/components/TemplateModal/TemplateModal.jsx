@@ -29,6 +29,28 @@ function getNestedValue(obj, keyPaths) {
   return 'N/A';
 }
 
+//Utility to match iso code to language name
+const languageMap = (language) => {
+  if (language === 'en') return 'English';
+  if (language === 'en_US') return 'English (US)';
+  if (language === 'en_GB') return 'English (UK)';
+  if (language === 'es') return 'Spanish';
+  if (language === 'es_LA') return 'Spanish (LA)';
+  if (language === 'pt_BR') return 'Portuguese (BR)';
+  else return language;
+};
+
+
+// Utility to capitalize the first letter of each word
+const capitalizeWords = (text) =>
+  text
+    .replace('twilio/','')
+    .replace('whatsapp/','')
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+
 const TemplateModal = ({ templates, isOpen, onClose, onTemplateSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredTemplates, setFilteredTemplates] = useState(templates);
@@ -140,9 +162,9 @@ const TemplateModal = ({ templates, isOpen, onClose, onTemplateSelect }) => {
           <Box>
             <Select id="category-select" value={selectedFilters.category} onChange={(e) => handleFilterChange('category', e.target.value)}>
               <Option value="">All Categories</Option>
-              <Option value="MARKETING">MARKETING</Option>
-              <Option value="UTILITY">UTILITY</Option>
-              <Option value="N/A">SESSION MESSAGE</Option>
+              <Option value="MARKETING">Marketing</Option>
+              <Option value="UTILITY">Utility</Option>
+              <Option value="N/A">Session Message</Option>
             </Select>
           </Box>
 
@@ -198,9 +220,6 @@ const TemplateModal = ({ templates, isOpen, onClose, onTemplateSelect }) => {
                 <DataGridHeader>
                   <Box width="100px">Status</Box>
                 </DataGridHeader>
-                <DataGridHeader>
-                  <Box width="100px">SID</Box>
-                </DataGridHeader>
               </DataGridRow>
             </DataGridHead>
             <DataGridBody>
@@ -223,25 +242,22 @@ const TemplateModal = ({ templates, isOpen, onClose, onTemplateSelect }) => {
                       </Box>
                     </DataGridCell>
                     <DataGridCell>
-                      <Box width="100px">{friendlyName}</Box>
+                      <Box>{capitalizeWords(friendlyName)}</Box>
                     </DataGridCell>
                     <DataGridCell>
-                      <Box width="300px">{body}</Box>
+                      <Box>{body}</Box>
                     </DataGridCell>
                     <DataGridCell>
-                      <Box width="100px">{contentType}</Box>
+                      <Box>{capitalizeWords(contentType)}</Box>
                     </DataGridCell>
                     <DataGridCell>
-                      <Box width="100px">{language}</Box>
+                      <Box>{languageMap(language)}</Box>
                     </DataGridCell>
                     <DataGridCell>
-                      <Box width="100px">{approvalCategory}</Box>
+                      <Box>{capitalizeWords(approvalCategory)}</Box>
                     </DataGridCell>
                     <DataGridCell>
-                      <Box width="100px">{approvalStatus}</Box>
-                    </DataGridCell>
-                    <DataGridCell>
-                      <Box width="100px">{sid}</Box>
+                      <Box>{capitalizeWords(approvalStatus)}</Box>
                     </DataGridCell>
                   </DataGridRow>
                 );

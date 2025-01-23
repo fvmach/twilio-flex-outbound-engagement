@@ -41,46 +41,43 @@ const MessagePersonalization = ({
         <ModalHeading as="h3">Personalize Message Variables</ModalHeading>
       </ModalHeader>
       <ModalBody>
-        <Box marginBottom="space60">
+        <Box>
           <Text as="p" fontSize="fontSize30" fontWeight="fontWeightBold">
             Template Preview:
           </Text>
-          <Text as="p" fontSize="fontSize20" style={{ color: '#555' }}>
+          <Box padding={10} textAlign='center' border="borderWidth10" borderColor={templateBody ? 'colorBorderWeaker' : 'colorBorderStrong'}>
             {templateBody}
-          </Text>
+          </Box>
         </Box>
         {Object.keys(templateVariables).map((key) => (
-          <Box key={key} display="flex" alignItems="center" marginBottom="space40" padding="space30" borderBottom="borderWidth10">
-            <Label htmlFor={`variable-${key}`} style={{ marginRight: '8px' }}>
-              Variable {key}
-            </Label>
-            <Input
-              id={`variable-${key}`}
-              type="text"
-              value={templateVariables[key]}
-              onChange={(e) => handleVariableChange(key, e.target.value)}
-              placeholder={`Enter value for {{${key}}}`}
-              style={{
-                fontWeight: 'bold',
-                borderColor: '#99CDFF',
-                flexGrow: 2,
-                marginRight: '8px',
-                padding: '8px',
-              }}
-            />
-            <Select
-              onChange={(e) => handleColumnSelect(key, e.target.value)}
-              value={templateVariables[key].startsWith('{{') ? templateVariables[key] : ''}
-              placeholder="Select from data source"
-              style={{ flexGrow: 1 }}
-            >
-              <option value="">Select Column</option>
-              {columnOptions.map((col) => (
-                <option key={col} value={col}>
-                  {col}
-                </option>
-              ))}
-            </Select>
+          <Box key={key} alignItems="center" padding={10}>
+            <Box padding={5}>
+              <Label htmlFor={`variable-${key}`}>
+                Variable {key}
+              </Label>
+              <Input
+                id={`variable-${key}`}
+                type="text"
+                value={templateVariables[key]}
+                onChange={(e) => handleVariableChange(key, e.target.value)}
+                placeholder={`Enter value for {{${key}}}`}
+                style={{ marginRight: '8px' }}
+              />
+            </Box>
+            <Box padding={5}>
+              <Select
+                onChange={(e) => handleColumnSelect(key, e.target.value)}
+                value={templateVariables[key].startsWith('{{') ? templateVariables[key] : ''}
+                placeholder="Select from data source"
+              >
+                <option value="">Select Column</option>
+                {columnOptions.map((col) => (
+                  <option key={col} value={col}>
+                    {col}
+                  </option>
+                ))}
+              </Select>
+            </Box>
           </Box>
         ))}
       </ModalBody>
