@@ -5,7 +5,7 @@ The **Twilio Flex Outbound Engagement** plugin is a Twilio Flex plugin designed 
 ## Features
 
 ### Outbound Messaging Component
-- Supports sending messages through WhatsApp (multi-channel selection WIP: RCS, SMS, Email and Voice)
+- Supports sending messages through WhatsApp (multi-channel selection WIP: RCS, SMS, Email, and Voice)
 - Wizard-based interface for:
   1. **Channel Selection**
   2. **Contact Management**
@@ -33,10 +33,9 @@ The **Twilio Flex Outbound Engagement** plugin is a Twilio Flex plugin designed 
   - Real-time personalization of templates before sending.
 
 ### Start New Conversation With Template (WIP)
-
-- This feature will allow for agents to start new 1:1 conversations by selecting and sending a template, incluing:
-   - Task creation. 
-   - Task assignment through known agent routing.
+- This feature will allow agents to start new 1:1 conversations by selecting and sending a template, including:
+  - Task creation.
+  - Task assignment through known agent routing.
 
 ## Disclaimer
 
@@ -72,9 +71,11 @@ Feedback and contributions are welcome as we continue to improve and expand its 
 Ensure the following environment variables are set in your `.env` file for secure API access:
 
 ```plaintext
-REACT_APP_TWILIO_ACCOUNT_SID=your_account_sid
-REACT_APP_TWILIO_AUTH_TOKEN=your_auth_token
-REACT_APP_TWILIO_CONTENT_API_BASE_URL=https://content.twilio.com/v1
+TWILIO_WHATSAPP_NUMBER=whatsapp:+55119XXXXXXXXX
+TWILIO_FUNCTIONS_URL=https://<your-serverless-service-name>-<four-numbers>.twil.io
+SERVERLESS_SERVICE_SID=ZSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+SENDGRID_API_KEY=SG.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+SEGMENT_SPACE_ID=spa_XXXXXXXXXXXXXXX
 ```
 
 ### Twilio Services
@@ -98,15 +99,31 @@ REACT_APP_TWILIO_CONTENT_API_BASE_URL=https://content.twilio.com/v1
 
 ## Development
 
-### File Structure
-- **index.js**: Entry point for the plugin.
-- **FlexOutboundPlugin.js**: Core plugin logic and initialization.
-- **OutboundMessaging.jsx**: Main component for the outbound messaging workflow.
-- **TemplateMenu.jsx**: Component for displaying and managing templates.
-- **ContactModal.jsx**: Modal for managing contact lists.
-- **MessageActionsSendTemplateButton.jsx**: Button component to send templates in conversations.
-- **DatabaseConnection.js**: Utility for interacting with external databases.
-- **SideModalStyles.css**: Styling for side modals used in the plugin.
+- **serverless-functions/**: Contains serverless functions for backend operations.
+  - **whatsapp/**:
+    - **list-templates-approvals.js**: Function to list template approvals.
+    - **send-whatsapp-templates.js**: Function to send WhatsApp templates.
+- **src/**: Source files for the plugin.
+  - **components/**: React components for the plugin.
+    - **ContactModal/**:
+      - **ContactModal.jsx**: Component for managing contacts.
+    - **DatabaseConnection/**:
+      - **DatabaseConnection.js**: Utility for interacting with external databases.
+    - **MessageActionsSendTemplateButton/**:
+      - **MessageActionsSendTemplateButton.jsx**: Button for sending templates during conversations.
+    - **MessagePersonalization/**:
+      - **MessagePersonalization.jsx**: Component for personalizing message templates.
+    - **OutboundMessaging/**:
+      - **OutboundMessaging.jsx**: Main component for outbound messaging workflows.
+    - **TemplateMenu/**:
+      - **TemplateMenu.jsx**: Component for managing templates.
+    - **TemplateModal/**:
+      - **TemplateModal.jsx**: Modal for displaying template details.
+  - **FlexOutboundPlugin.js**: Core plugin logic and initialization.
+  - **index.js**: Entry point for the plugin.
+  - **SideModalStyles.css**: Styling for side modals used in the plugin.
+- **webpack.config.js**: Webpack configuration for production builds.
+- **webpack.dev.js**: Webpack configuration for development builds.
 
 ### Testing
 Run unit tests with:
