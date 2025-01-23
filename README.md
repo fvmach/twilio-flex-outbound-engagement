@@ -1,16 +1,16 @@
 # Twilio Flex Outbound Engagement
 
-The **Twilio Flex Outbound Engagement** is a Twilio Flex plugin designed to streamline outbound messaging campaigns for contact center agents. This plugin provides a user-friendly interface to manage messaging channels, contacts, templates, and personalization while maintaining seamless integration with Twilio services.
+The **Twilio Flex Outbound Engagement** plugin is a Twilio Flex plugin designed to streamline outbound messaging campaigns for contact center agents. This plugin provides a user-friendly interface to manage messaging channels, contacts, templates, and personalization while maintaining seamless integration with Twilio services.
 
 ## Features
 
 ### Outbound Messaging Component
-- Supports sending messages through multiple channels (e.g., SMS, WhatsApp).
+- Supports sending messages through WhatsApp (multi-channel selection WIP: RCS, SMS, Email and Voice)
 - Wizard-based interface for:
   1. **Channel Selection**
   2. **Contact Management**
   3. **Template Selection**
-  4. **Message Validation**
+  4. **Message Personalization**
   5. **Message Sending**
 
 ### Template Management
@@ -22,12 +22,27 @@ The **Twilio Flex Outbound Engagement** is a Twilio Flex plugin designed to stre
 
 ### Personalization
 - Map variables in templates to specific data sources (CSV, assets, or external databases).
-- Easy-to-use "+" button to link variables to data columns.
+- Link variables to data columns.
+- Unified Profiles-based personalization WIP.
 
-### Supervisor Features
-- SOS button for agents to report application issues, triggering debug logs and diagnostics.
-- Supervisor coaching messages visible only to agents during active conversations.
-- Coaching messages available in the conversation transcript for monitoring.
+### Template Sending During Conversations
+- Agents can send templates during an active conversation using the **Send Template** button in the Message Input Actions.
+- The feature integrates directly into the MessageInputActions asset, enabling:
+  - Template selection by category.
+  - Search and pinning for frequently used templates.
+  - Real-time personalization of templates before sending.
+
+### Start New Conversation With Template (WIP)
+
+- This feature will allow for agents to start new 1:1 conversations by selecting and sending a template, incluing:
+   - Task creation. 
+   - Task assignment through known agent routing.
+
+## Disclaimer
+
+This plugin is classified as a **Class B Plugin**. It is provided as **sample code** and is currently a **work in progress**. While it demonstrates features and functionalities that can be implemented, it is not production-ready and should be used with caution.
+
+Feedback and contributions are welcome as we continue to improve and expand its capabilities. If you encounter any issues or have suggestions, please reach out via the contact information below.
 
 ## Installation
 
@@ -77,6 +92,9 @@ REACT_APP_TWILIO_CONTENT_API_BASE_URL=https://content.twilio.com/v1
    - Pick and customize a message template.
    - Validate and preview the message.
    - Send the message and monitor delivery status.
+4. During a live conversation, use the **Send Template** button in the MessageInputActions to:
+   - Select and personalize a template.
+   - Send the template directly to the customer.
 
 ## Development
 
