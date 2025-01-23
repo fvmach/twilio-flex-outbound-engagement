@@ -48,7 +48,7 @@ Feedback and contributions are welcome as we continue to improve and expand its 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repository/flex-outbound-plugin.git
+   git clone https://github.com/fvmach/twilio-flex-outbound-engagement
    ```
 
 2. Navigate to the project directory:
