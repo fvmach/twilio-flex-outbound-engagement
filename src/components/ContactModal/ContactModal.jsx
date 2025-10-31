@@ -8,11 +8,12 @@ import { Text } from '@twilio-paste/core/text';
 import { Input } from '@twilio-paste/core/input';
 import { Select, Option } from '@twilio-paste/core/select';
 import Papa from 'papaparse';
+import { ENDPOINTS } from '../../config';
 
 // Fetch unified profiles from the Segment's Profiles API using the search parameters and a Twilio Function
 const fetchUnifiedProfiles = async (searchParams) => {
   try {
-    const response = await fetch('https://flex-omnichannel-campaigns-3419.twil.io/unify-search-contacts', {
+    const response = await fetch(ENDPOINTS.SEARCH_UNIFIED_PROFILES, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +37,7 @@ const fetchUnifiedProfiles = async (searchParams) => {
 
 const fetchContactsFromAsset = async () => {
   try {
-    const response = await fetch('https://flex-omnichannel-campaigns-3419.twil.io/fetch-contacts', {
+    const response = await fetch(ENDPOINTS.FETCH_CONTACTS, {
       method: 'GET'
     });
 

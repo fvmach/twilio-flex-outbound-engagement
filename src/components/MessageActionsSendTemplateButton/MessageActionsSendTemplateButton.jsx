@@ -10,6 +10,7 @@ import {
 import { ChevronDownIcon } from '@twilio-paste/icons/esm/ChevronDownIcon';
 import { Theme } from '@twilio-paste/core/theme';
 import { Box, Text, Label, Input, Modal, ModalHeader, ModalHeading, ModalBody, ModalFooter, Button } from '@twilio-paste/core';
+import { ENDPOINTS } from '../../config';
 
 // Utility to capitalize the first letter of each word
 const capitalizeWords = (text) =>
@@ -22,7 +23,7 @@ const capitalizeWords = (text) =>
 const fetchTemplates = async () => {
   try {
     const response = await fetch(
-      'https://flex-omnichannel-campaigns-3419.twil.io/list-templates-approvals',
+      ENDPOINTS.LIST_TEMPLATES,
       { method: 'GET' }
     );
     const data = await response.json();
@@ -172,7 +173,7 @@ const MessageActionsSendTemplateButton = ({ task }) => {
   
     try {
       const response = await fetch(
-        'https://flex-omnichannel-campaigns-3419.twil.io/post-template-to-conversation',
+        ENDPOINTS.POST_TEMPLATE_TO_CONVERSATION,
         {
           method: 'POST',
           headers: {

@@ -17,6 +17,7 @@ import { SendIcon } from '@twilio-paste/icons/esm/SendIcon';
 import TemplateModal from '../TemplateModal/TemplateModal';
 import ContactModal from '../ContactModal/ContactModal';
 import MessagePersonalization from '../MessagePersonalization/MessagePersonalization';
+import { ENDPOINTS } from '../../config';
 
 const OutboundMessaging = ({
   selectedContacts,
@@ -43,7 +44,7 @@ const OutboundMessaging = ({
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const response = await fetch('https://flex-omnichannel-campaigns-3419.twil.io/list-templates-approvals');
+        const response = await fetch(ENDPOINTS.LIST_TEMPLATES);
         if (!response.ok) throw new Error('Failed to fetch templates');
         
         const data = await response.json();
@@ -121,7 +122,7 @@ const OutboundMessaging = ({
     });
 
     try {
-      const response = await fetch(`https://flex-omnichannel-campaigns-3419.twil.io/whatsapp_send_template?${queryParams.toString()}`);
+      const response = await fetch(`${ENDPOINTS.SEND_TEMPLATE}?${queryParams.toString()}`);
       const result = await response.json();
 
       if (result.success) {

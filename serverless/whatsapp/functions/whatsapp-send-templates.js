@@ -41,8 +41,13 @@ exports.handler = async function (context, event, callback) {
     for (let i = index; i < totalContacts; i++) {
       const phoneNumber = contacts[i];
 
+      // Handle WhatsApp number formatting - check if it already has whatsapp: prefix
+      const fromNumber = context.TWILIO_WHATSAPP_NUMBER.startsWith('whatsapp:') 
+        ? context.TWILIO_WHATSAPP_NUMBER 
+        : `whatsapp:${context.TWILIO_WHATSAPP_NUMBER}`;
+
       await client.messages.create({
-        from: `whatsapp:${context.TWILIO_WHATSAPP_NUMBER}`,
+        from: fromNumber,
         to: phoneNumber,
         contentSid: templateSid,
         contentVariables: JSON.stringify(templateVariables)
